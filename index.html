@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tech Activity Hub</title>
+<style>
+body {font-family: Arial; text-align:center; background:#0f172a; color:white;}
+textarea {width:300px;height:120px;}
+button {padding:10px;margin:10px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;}
+</style>
+</head>
+
+<body>
+
+<h1>🎮 Tech Activity Hub</h1>
+
+<p>Enter student names (one per line)</p>
+<textarea id="names"></textarea><br>
+
+<button onclick="saveNames()">Start Activities</button>
+
+<script>
+function saveNames(){
+    let names = document.getElementById("names").value
+        .split("\n")
+        .filter(n=>n.trim()!="");
+
+    localStorage.setItem("students", JSON.stringify(names));
+
+    window.location.href = "wheel.html";
+}
+</script>
+
+</body>
+</html>

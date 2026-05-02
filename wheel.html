@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Wheel Activity</title>
+<style>
+body {text-align:center;background:#0f172a;color:white;}
+canvas {background:white;border-radius:50%;}
+button {padding:10px;margin:10px;background:#38bdf8;border:none;border-radius:8px;}
+</style>
+</head>
+
+<body>
+
+<h1>🎡 Spin Wheel</h1>
+
+<canvas id="wheel" width="400" height="400"></canvas><br>
+<button onclick="spin()">SPIN</button>
+<button onclick="goHome()">HOME</button>
+
+<script>
+
+let students = JSON.parse(localStorage.getItem("students")) || [];
+
+let canvas = document.getElementById("wheel");
+let ctx = canvas.getContext("2d");
+
+function draw(){
+    ctx.clearRect(0,0,400,400);
+    let angle = 2*Math.PI/students.length;
+
+    students.forEach((s,i)=>{
+        ctx.beginPath();
+        ctx.moveTo(200,200);
+        ctx.arc(200,200,200,i*angle,(i+1)*angle);
+        ctx.fillStyle=i%2?"#1e293b":"#38bdf8";
+        ctx.fill();
+
+        ctx.fillStyle="white";
+        ctx.save();
+        ctx.translate(200,200);
+        ctx.rotate(i*angle+angle/2);
+        ctx.fillText(s,90,0);
+        ctx.restore();
+    });
+}
+
+draw();
+
+function spin(){
+    if(students.length===0){alert("No students");return;}
+
+    let i=Math.floor(Math.random()*students.length);
+    let s=students[i];
+
+    alert("Selected: "+s);
+
+    students.splice(i,1);
+    localStorage.setItem("students", JSON.stringify(students));
+
+    draw();
+}
+
+function goHome(){
+    window.location.href="index.html";
+}
+
+</script>
+
+</body>
+</html>
