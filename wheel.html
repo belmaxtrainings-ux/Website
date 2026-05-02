@@ -1,82 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Wheel</title>
-
-<style>
-body {font-family:'Segoe UI';background:#0f172a;color:white;text-align:center;}
-canvas {background:white;border-radius:50%;}
-button {padding:10px;margin:5px;border-radius:8px;border:none;background:#38bdf8;}
-.option {background:#1e293b;margin:5px;padding:8px;border-radius:6px;cursor:pointer;}
-</style>
+<title>Wheel of Names</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h2>🎡 Spin Wheel</h2>
+<header>🎡 Wheel of Names</header>
 
-<canvas id="wheel" width="300" height="300"></canvas><br>
-
+<div class="container">
+<canvas id="wheel" width="400" height="400"></canvas>
 <button onclick="spin()">SPIN</button>
-<button onclick="home()">Home</button>
-
-<div id="quiz" style="display:none;">
-<h3 id="name"></h3>
-<p id="q"></p>
-<div id="opts"></div>
+<h2 id="winner"></h2>
 </div>
 
 <script>
+let students = JSON.parse(localStorage.getItem("students")) || [];
+let canvas = document.getElementById("wheel");
+let ctx = canvas.getContext("2d");
+let angle = 0;
 
-let students=JSON.parse(localStorage.getItem("students"))||[];
-let canvas=document.getElementById("wheel");
-let ctx=canvas.getContext("2d");
-
-let questions=[
-{q:"CPU stands for?",o:["Central Processing Unit","Control","Unit","None"],a:0},
-{q:"Binary of 2?",o:["10","11","01","00"],a:0}
-];
+function getFontSize(count){
+    if(count <= 5) return 18;
+    if(count <= 10) return 14;
+    if(count <= 20) return 11;
+    return 9;
+}
 
 function draw(){
-    ctx.clearRect(0,0,300,300);
-    let arc=2*Math.PI/students.length;
+    let arc = 2 * Math.PI / students.length;
 
     students.forEach((s,i)=>{
         ctx.beginPath();
-        ctx.moveTo(150,150);
-        ctx.arc(150,150,150,i*arc,(i+1)*arc);
-        ctx.fillStyle=i%2?"#1e293b":"#38bdf8";
+        ctx.moveTo(200,200);
+        ctx.arc(200,200,200,i*arc+angle,(i+1)*arc+angle);
+        ctx.fillStyle = `hsl(${i*40},70%,60%)`;
         ctx.fill();
 
+        ctx.save();
+        ctx.translate(200,200);
+        ctx.rotate(i*arc + arc/2 + angle);
+
         ctx.fillStyle="white";
-        ctx.fillText(s,150,150);
+        ctx.font = getFontSize(students.length) + "px Arial";
+        ctx.textAlign="right";
+
+        let name = s.length > 10 ? s.substring(0,10)+"…" : s;
+        ctx.fillText(name,180,5);
+
+        ctx.restore();
     });
 }
 
 draw();
 
 function spin(){
-    let s=students[Math.floor(Math.random()*students.length)];
-    let q=questions[Math.floor(Math.random()*questions.length)];
+    let spins = 30;
+    let interval = setInterval(()=>{
+        angle += 0.3;
+        ctx.clearRect(0,0,400,400);
+        draw();
+        spins--;
 
-    document.getElementById("quiz").style.display="block";
-    document.getElementById("name").innerText=s;
-    document.getElementById("q").innerText=q.q;
-
-    let div=document.getElementById("opts");
-    div.innerHTML="";
-
-    q.o.forEach((opt,i)=>{
-        let btn=document.createElement("div");
-        btn.className="option";
-        btn.innerText=opt;
-        btn.onclick=()=>alert(i===q.a?"Correct":"Wrong");
-        div.appendChild(btn);
-    });
+        if(spins<=0){
+            clearInterval(interval);
+            let winner = students[Math.floor(Math.random()*students.length)];
+            document.getElementById("winner").innerText = "🎉 " + winner;
+        }
+    },40);
 }
-
-function home(){ window.location.href="index.html"; }
-
 </script>
 
 </body>
