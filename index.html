@@ -1,205 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Tech Activity Hub Pro</title>
+<title>Tech Teacher Toolkit</title>
 
 <style>
 body {
     font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: white;
-    text-align: center;
+    margin:0;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+}
+
+header {
+    text-align:center;
+    padding:20px;
+    font-size:24px;
+    color:#38bdf8;
+}
+
+.container {
+    max-width:900px;
+    margin:auto;
+    padding:20px;
 }
 
 textarea {
-    width: 300px;
-    height: 100px;
-    border-radius: 10px;
-    padding: 10px;
+    width:100%;
+    height:100px;
+    border-radius:10px;
+    padding:10px;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.card {
+    background:rgba(255,255,255,0.08);
+    padding:20px;
+    border-radius:12px;
+    cursor:pointer;
+    text-align:center;
+    transition:0.2s;
+}
+
+.card:hover {
+    transform:scale(1.05);
+    background:#38bdf8;
+    color:black;
 }
 
 button {
-    padding: 10px 15px;
-    margin: 5px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-}
-
-.primary { background: #38bdf8; }
-.card {
-    background: rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-/* Wheel */
-canvas {
-    background: white;
-    border-radius: 50%;
-    margin-top: 20px;
-}
-
-/* Quiz */
-.option {
-    margin: 5px;
-    padding: 8px;
-    background: #1e293b;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.option:hover { background:#38bdf8;color:black; }
-
-/* Scoreboard */
-.scoreboard {
-    max-width: 300px;
-    margin: auto;
+    padding:10px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    background:#38bdf8;
+    cursor:pointer;
 }
 </style>
-
 </head>
 
 <body>
 
-<h1>🎮 Tech Activity Hub PRO</h1>
+<header>🎮 Tech Teacher Toolkit</header>
 
-<div class="card">
-<textarea id="names" placeholder="Enter names..."></textarea><br>
-<button class="primary" onclick="start()">Start</button>
+<div class="container">
+
+<h3>👩‍🏫 Enter Student Names</h3>
+<textarea id="names" placeholder="One name per line"></textarea>
+<button onclick="saveNames()">Save Names</button>
+
+<div class="grid">
+
+<div class="card" onclick="go('wheel.html')">
+🎡 Wheel + Quiz
 </div>
 
-<canvas id="wheel" width="400" height="400"></canvas><br>
-<button class="primary" onclick="spin()">SPIN</button>
-
-<div id="quiz" class="card" style="display:none;">
-<h3 id="studentName"></h3>
-<p id="question"></p>
-<div id="options"></div>
+<div class="card" onclick="go('ladder.html')">
+🪜 Ladder Game
 </div>
 
-<div class="scoreboard card">
-<h3>🏆 Scoreboard</h3>
-<div id="scores"></div>
+<div class="card" onclick="go('quiz.html')">
+❓ Quick Quiz
 </div>
 
-<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
-<audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-<audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+</div>
+
+</div>
 
 <script>
 
-let students=[];
-let scores={};
-let currentStudent="";
-
-let questions=[
-{q:"CPU stands for?", options:["Central Processing Unit","Control","Unit","None"], answer:0},
-{q:"Binary of 2?", options:["10","11","01","00"], answer:0},
-{q:"Input device?", options:["Keyboard","Monitor","Speaker","Printer"], answer:0},
-{q:"RAM is?", options:["Memory","CPU","Software","Virus"], answer:0}
-];
-
-let canvas=document.getElementById("wheel");
-let ctx=canvas.getContext("2d");
-let angle=0;
-
-// START
-function start(){
-    students=document.getElementById("names").value.split("\n").filter(n=>n);
-    students.forEach(s=>scores[s]=0);
-    updateScores();
-    draw();
+function saveNames(){
+    let names=document.getElementById("names").value.split("\n").filter(n=>n);
+    localStorage.setItem("students", JSON.stringify(names));
+    alert("Saved!");
 }
 
-// DRAW WHEEL
-function draw(){
-    ctx.clearRect(0,0,400,400);
-
-    let arc=2*Math.PI/students.length;
-
-    students.forEach((s,i)=>{
-        ctx.beginPath();
-        ctx.moveTo(200,200);
-        ctx.arc(200,200,200,i*arc+angle,(i+1)*arc+angle);
-        ctx.fillStyle=i%2?"#1e293b":"#38bdf8";
-        ctx.fill();
-
-        ctx.fillStyle="white";
-        ctx.save();
-        ctx.translate(200,200);
-        ctx.rotate(i*arc+arc/2+angle);
-        ctx.fillText(s,90,0);
-        ctx.restore();
-    });
-}
-
-// SPIN ANIMATION
-function spin(){
-
-    if(students.length===0){alert("No students");return;}
-
-    document.getElementById("spinSound").play();
-
-    let spins=20;
-    let interval=setInterval(()=>{
-        angle+=0.3;
-        draw();
-        spins--;
-
-        if(spins<=0){
-            clearInterval(interval);
-
-            let index=Math.floor(Math.random()*students.length);
-            currentStudent=students[index];
-
-            showQuestion(currentStudent);
-        }
-    },50);
-}
-
-// QUIZ
-function showQuestion(name){
-
-    let q=questions[Math.floor(Math.random()*questions.length)];
-
-    document.getElementById("quiz").style.display="block";
-    document.getElementById("studentName").innerText="🎯 "+name;
-    document.getElementById("question").innerText=q.q;
-
-    let optDiv=document.getElementById("options");
-    optDiv.innerHTML="";
-
-    q.options.forEach((opt,i)=>{
-        let btn=document.createElement("div");
-        btn.className="option";
-        btn.innerText=opt;
-
-        btn.onclick=()=>{
-            if(i===q.answer){
-                document.getElementById("correctSound").play();
-                scores[name]++;
-            } else {
-                document.getElementById("wrongSound").play();
-            }
-
-            updateScores();
-            document.getElementById("quiz").style.display="none";
-        };
-
-        optDiv.appendChild(btn);
-    });
-}
-
-// SCOREBOARD
-function updateScores(){
-    let div=document.getElementById("scores");
-    div.innerHTML="";
-
-    for(let s in scores){
-        div.innerHTML+=s+" : "+scores[s]+"<br>";
-    }
+function go(page){
+    window.location.href=page;
 }
 
 </script>
