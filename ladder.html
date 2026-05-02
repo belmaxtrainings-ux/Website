@@ -1,53 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ladder</title>
-
-<style>
-body {background:#0f172a;color:white;text-align:center;}
-.student {background:#1e293b;margin:5px;padding:8px;cursor:pointer;}
-.ladder {height:300px;border-left:5px solid white;border-right:5px solid white;position:relative;width:200px;margin:auto;}
-.player {position:absolute;left:50%;transform:translateX(-50%);}
-</style>
+<title>Ladder Leaderboard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h2>🪜 Ladder Game</h2>
+<header>🪜 Ladder Leaderboard</header>
 
-<div id="list"></div>
-<div class="ladder" id="ladder"></div>
-
-<button onclick="home()">Home</button>
+<div class="container">
+<div id="board"></div>
+<button onclick="randomBoost()">🎲 Random Boost</button>
+</div>
 
 <script>
+let students = JSON.parse(localStorage.getItem("students")) || [];
+let scores = {};
 
-let students=JSON.parse(localStorage.getItem("students"))||[];
-let progress={};
+students.forEach(s=>scores[s]=0);
 
-students.forEach(s=>progress[s]=0);
+function render(){
+    let sorted = Object.entries(scores)
+        .sort((a,b)=>b[1]-a[1]);
 
-students.forEach(s=>{
-    let row=document.createElement("div");
-    row.className="student";
-    row.innerText=s;
-    row.onclick=()=>move(s);
-    document.getElementById("list").appendChild(row);
+    let html = "";
+    sorted.forEach(([name,score],i)=>{
+        html += `<div class="card">${i+1}. ${name} - ${score}</div>`;
+    });
 
-    let p=document.createElement("div");
-    p.className="player";
-    p.id=s;
-    p.innerText="🚀 "+s;
-    document.getElementById("ladder").appendChild(p);
-});
-
-function move(s){
-    progress[s]++;
-    document.getElementById(s).style.bottom=(progress[s]*30)+"px";
+    document.getElementById("board").innerHTML = html;
 }
 
-function home(){ window.location.href="index.html"; }
+function randomBoost(){
+    let s = students[Math.floor(Math.random()*students.length)];
+    scores[s] += 1;
+    render();
+}
 
+render();
 </script>
 
 </body>
