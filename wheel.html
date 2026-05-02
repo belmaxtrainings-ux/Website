@@ -1,68 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Wheel Activity</title>
+<title>Wheel</title>
+
 <style>
-body {text-align:center;background:#0f172a;color:white;}
+body {font-family:'Segoe UI';background:#0f172a;color:white;text-align:center;}
 canvas {background:white;border-radius:50%;}
-button {padding:10px;margin:10px;background:#38bdf8;border:none;border-radius:8px;}
+button {padding:10px;margin:5px;border-radius:8px;border:none;background:#38bdf8;}
+.option {background:#1e293b;margin:5px;padding:8px;border-radius:6px;cursor:pointer;}
 </style>
 </head>
 
 <body>
 
-<h1>🎡 Spin Wheel</h1>
+<h2>🎡 Spin Wheel</h2>
 
-<canvas id="wheel" width="400" height="400"></canvas><br>
+<canvas id="wheel" width="300" height="300"></canvas><br>
+
 <button onclick="spin()">SPIN</button>
-<button onclick="goHome()">HOME</button>
+<button onclick="home()">Home</button>
+
+<div id="quiz" style="display:none;">
+<h3 id="name"></h3>
+<p id="q"></p>
+<div id="opts"></div>
+</div>
 
 <script>
 
-let students = JSON.parse(localStorage.getItem("students")) || [];
+let students=JSON.parse(localStorage.getItem("students"))||[];
+let canvas=document.getElementById("wheel");
+let ctx=canvas.getContext("2d");
 
-let canvas = document.getElementById("wheel");
-let ctx = canvas.getContext("2d");
+let questions=[
+{q:"CPU stands for?",o:["Central Processing Unit","Control","Unit","None"],a:0},
+{q:"Binary of 2?",o:["10","11","01","00"],a:0}
+];
 
 function draw(){
-    ctx.clearRect(0,0,400,400);
-    let angle = 2*Math.PI/students.length;
+    ctx.clearRect(0,0,300,300);
+    let arc=2*Math.PI/students.length;
 
     students.forEach((s,i)=>{
         ctx.beginPath();
-        ctx.moveTo(200,200);
-        ctx.arc(200,200,200,i*angle,(i+1)*angle);
+        ctx.moveTo(150,150);
+        ctx.arc(150,150,150,i*arc,(i+1)*arc);
         ctx.fillStyle=i%2?"#1e293b":"#38bdf8";
         ctx.fill();
 
         ctx.fillStyle="white";
-        ctx.save();
-        ctx.translate(200,200);
-        ctx.rotate(i*angle+angle/2);
-        ctx.fillText(s,90,0);
-        ctx.restore();
+        ctx.fillText(s,150,150);
     });
 }
 
 draw();
 
 function spin(){
-    if(students.length===0){alert("No students");return;}
+    let s=students[Math.floor(Math.random()*students.length)];
+    let q=questions[Math.floor(Math.random()*questions.length)];
 
-    let i=Math.floor(Math.random()*students.length);
-    let s=students[i];
+    document.getElementById("quiz").style.display="block";
+    document.getElementById("name").innerText=s;
+    document.getElementById("q").innerText=q.q;
 
-    alert("Selected: "+s);
+    let div=document.getElementById("opts");
+    div.innerHTML="";
 
-    students.splice(i,1);
-    localStorage.setItem("students", JSON.stringify(students));
-
-    draw();
+    q.o.forEach((opt,i)=>{
+        let btn=document.createElement("div");
+        btn.className="option";
+        btn.innerText=opt;
+        btn.onclick=()=>alert(i===q.a?"Correct":"Wrong");
+        div.appendChild(btn);
+    });
 }
 
-function goHome(){
-    window.location.href="index.html";
-}
+function home(){ window.location.href="index.html"; }
 
 </script>
 
