@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quiz</title>
+<style>
+body {background:#0f172a;color:white;text-align:center;}
+.option {background:#1e293b;margin:5px;padding:10px;cursor:pointer;}
+</style>
+</head>
+
+<body>
+
+<h2>❓ Quick Quiz</h2>
+
+<button onclick="next()">Next Question</button>
+<button onclick="home()">Home</button>
+
+<h3 id="q"></h3>
+<div id="opts"></div>
+
+<script>
+
+let questions=[
+{q:"CPU?",o:["Processor","Monitor","Mouse","None"],a:0},
+{q:"RAM?",o:["Memory","CPU","Disk","None"],a:0}
+];
+
+function next(){
+    let q=questions[Math.floor(Math.random()*questions.length)];
+
+    document.getElementById("q").innerText=q.q;
+
+    let div=document.getElementById("opts");
+    div.innerHTML="";
+
+    q.o.forEach((opt,i)=>{
+        let btn=document.createElement("div");
+        btn.className="option";
+        btn.innerText=opt;
+        btn.onclick=()=>alert(i===q.a?"Correct":"Wrong");
+        div.appendChild(btn);
+    });
+}
+
+function home(){ window.location.href="index.html"; }
+
+</script>
+
+</body>
+</html>
